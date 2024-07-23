@@ -1,0 +1,264 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+
+model Company {
+  id        String     @id @default(uuid())
+  name      String
+  factories Factory[]
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  record_status String? @default("A")
+
+  @@index([name])
+}
+
+
+
+model Factory {
+  id        String       @id @default(uuid())
+  name      String
+  company   Company      @relation(fields: [companyId], references: [id])
+  companyId String
+  lines     ProductionLine[]
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+  record_status String? @default("A")
+
+  @@index([name])
+  @@index([companyId])
+}
+
+
+model ProductionLine {
+  id        String    @id @default(uuid())
+  name      String
+  factory   Factory   @relation(fields: [factoryId], references: [id])
+  factoryId String
+  machines  Machine[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  record_status String? @default("A")
+
+  @@index([name])
+  @@index([factoryId])
+}
+
+model Machine {
+  id                String              @id @default(uuid())
+  name              String
+  type              String
+  installationDate  DateTime
+  productionLine    ProductionLine      @relation(fields: [productionLineId], references: [id])
+  productionLineId  String
+  maintenanceTasks  MaintenanceTask[]
+  spareParts        SparePart[]
+  statusSegments    MachineStatusSegment[]
+  hourMeterTotals   MachineHourMeterTotal[]
+  powerMetrics      PowerMetric[]
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  record_status String? @default("A")
+
+  @@index([name])
+  @@index([type])
+  @@index([productionLineId])
+  @@index([installationDate])
+}
+
+model MachineStatusSegment {
+  id              String   @id @default(uuid())
+  machine         Machine  @relation(fields: [machineId], references: [id])
+  machineId       String
+  group           String
+  status          String
+  description     String
+  startDatetime   DateTime
+  endDatetime     DateTime
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([machineId])
+  @@index([status])
+  @@index([startDatetime, endDatetime])
+}
+
+model MachineHourMeterTotal {
+  id        String   @id @default(uuid())
+  machine   Machine  @relation(fields: [machineId], references: [id])
+  machineId String
+  normal    Int
+  stop      Int
+  risk      Int
+  abnormal  Int
+  total     Int
+  date      DateTime
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([machineId])
+  @@index([date])
+}
+
+model PowerMetric {
+  id                  String   @id @default(uuid())
+  machine             Machine  @relation(fields: [machineId], references: [id])
+  machineId           String
+  currentAvg          Float
+  voltageV31          Float
+  activePowerW3       Float
+  powerFactorPf2      Float
+  currentDemandDa1    Float
+  voltageAverageVll   Float
+  activePowerT        Float
+  powerFactorPf3      Float
+  currentDemandDa2    Float
+  voltageV1n          Float
+  reactivePowerVar1   Float
+  powerFactorT        Float
+  timestamp           DateTime
+  currentDemandDa3    Float
+  voltageV2n          Float
+  reactivePowerVar2   Float
+  frequencyHz         Float
+  currentA1           Float
+  currentDemandDan    Float
+  voltageV3n          Float
+  reactivePowerVar3   Float
+  harmonicCurrentHiT  Float
+  currentA2           Float
+  currentDemandDavg   Float
+  voltageAverageVln   Float
+  reactivePowerT      Float
+  harmonicVoltageHvT  Float
+  currentA3           Float
+  voltageV12          Float
+  activePowerW1       Float
+  powerFactorPf1      Float
+  currentAn           Float
+  voltageV23          Float
+  activePowerW2       Float
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  @@index([machineId])
+  @@index([timestamp])
+}
+
+model MaintenanceTask {
+  id          String   @id @default(uuid())
+  machine     Machine  @relation(fields: [machineId], references: [id])
+  machineId   String
+  task        String
+  description String?
+  dueDate     DateTime
+  status      TaskStatus
+  priority    Priority
+  assignedTo  User     @relation(fields: [assignedUserId], references: [id])
+  assignedUserId String
+  completedAt DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([machineId])
+  @@index([status])
+  @@index([dueDate])
+  @@index([assignedUserId])
+}
+
+model SparePart {
+  id                  String   @id @default(uuid())
+  sku                 String?  @unique
+  name                String
+  detail              String?
+  unit                Int?
+  lifespan            Int?
+  remainingLifespan   Int?
+  maintenanceInterval Int?
+  installationDate    DateTime?
+  machine             Machine  @relation(fields: [machineId], references: [id])
+  machineId           String
+  quantity            Int
+  minimumQuantity     Int
+  lastReplaced        DateTime?
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  @@index([machineId])
+  @@index([name])
+  @@index([sku])
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  userId    String
+  type      String
+  message   String
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([isRead])
+  @@index([createdAt])
+}
+
+model User {
+  id              String            @id @default(uuid())
+  username        String            @unique
+  email           String            @unique
+  password        String
+  firstName       String?
+  lastName        String?
+  role            UserRole
+  status          UserStatus
+  lastLogin       DateTime?
+  maintenanceTasks MaintenanceTask[]
+  notifications Notification[]
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+
+  @@index([username])
+  @@index([email])
+  @@index([role])
+  @@index([status])
+}
+enum UserRole {
+  ADMIN
+  MANAGER
+  TECHNICIAN
+  OPERATOR
+}
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+}
+
+
+enum TaskStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  OVERDUE
+}
+
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+}
+
