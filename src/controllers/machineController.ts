@@ -26,7 +26,7 @@ export const machineController = {
   },
 
   // ดึงข้อมูลเครื่องจักรทั้งหมด
-  async getAllMachines(res: Response): Promise<void> {
+  async getAllMachines(req: Request, res: Response): Promise<void> {
     try {
       const machines: Machine[] = await prisma.machine.findMany({
         include: { productionLine: true },
@@ -62,61 +62,61 @@ export const machineController = {
     }
   },
 
-async getMachineWithStatus(req: Request, res: Response): Promise<void> {
-  try {
-    const { company_id, factory_id, productionLine_id } = req.params;
+  async getMachineWithStatus(req: Request, res: Response): Promise<void> {
+    try {
+      const { company_id, factory_id, productionLine_id } = req.params;
 
-    // Build the where clause dynamically based on provided parameters
-    const whereClause: any = {};
+      // Build the where clause dynamically based on provided parameters
+      const whereClause: any = {};
 
-    if (company_id) {
-      whereClause.productionLine = { factory: { companyId: company_id } };
-    }
+      if (company_id) {
+        whereClause.productionLine = { factory: { companyId: company_id } };
+      }
 
-    if (factory_id) {
-      whereClause.productionLine = {
-        ...whereClause.productionLine,
-        factory: { ...whereClause.productionLine?.factory, id: factory_id },
-      };
-    }
+      if (factory_id) {
+        whereClause.productionLine = {
+          ...whereClause.productionLine,
+          factory: { ...whereClause.productionLine?.factory, id: factory_id },
+        };
+      }
 
-    if (productionLine_id) {
-      whereClause.productionLine = {
-        ...whereClause.productionLine,
-        id: productionLine_id,
-      };
-    }
+      if (productionLine_id) {
+        whereClause.productionLine = {
+          ...whereClause.productionLine,
+          id: productionLine_id,
+        };
+      }
 
-    const machines = await prisma.machine.findMany({
-      where: whereClause,
-      include: {
-        statusSegments: {
-          orderBy: { endDatetime: "desc" },
-          take: 1,
+      const machines = await prisma.machine.findMany({
+        where: whereClause,
+        include: {
+          statusSegments: {
+            orderBy: { endDatetime: "desc" },
+            take: 1,
+          },
+          hourMeterTotals: {
+            orderBy: { date: "desc" },
+            take: 1,
+          },
         },
-        hourMeterTotals: {
-          orderBy: { date: "desc" },
-          take: 1,
-        },
-      },
-    });
+      });
 
-    const machineStatuses = machines.map((machine) => ({
-      id: machine.id,
-      name: machine.name,
-      status: machine.statusSegments[0]?.status || "Unknown",
-      normal: machine.hourMeterTotals[0]?.normal || 0,
-      risk: machine.hourMeterTotals[0]?.risk || 0,
-      efficiency: calculateEfficiency(machine.hourMeterTotals[0]),
-    }));
+      const machineStatuses = machines.map((machine) => ({
+        id: machine.id,
+        name: machine.name,
+        status: machine.statusSegments[0]?.status || "Unknown",
+        normal: machine.hourMeterTotals[0]?.normal || 0,
+        risk: machine.hourMeterTotals[0]?.risk || 0,
+        efficiency: calculateEfficiency(machine.hourMeterTotals[0]),
+      }));
 
-    res.status(200).json(machineStatuses);
-  } catch (error) {
-    res
-      .status(500)
-      .json({ error: "ไม่สามารถดึงข้อมูลสถานะล่าสุดของเครื่องจักรได้" });
-  }
-},
+      res.status(200).json(machineStatuses);
+    } catch (error) {
+      res
+        .status(500)
+        .json({ error: "ไม่สามารถดึงข้อมูลสถานะล่าสุดของเครื่องจักรได้" });
+    }
+  },
 
   // อัปเดตข้อมูลเครื่องจักร
   async updateMachine(req: Request, res: Response): Promise<void> {
@@ -144,7 +144,7 @@ async getMachineWithStatus(req: Request, res: Response): Promise<void> {
   async deleteMachine(req: Request, res: Response): Promise<void> {
     try {
       const { id } = req.params;
-     const resault= await prisma.machine.delete({
+      const resault = await prisma.machine.delete({
         where: { id },
       });
       if (resault) {
@@ -158,7 +158,7 @@ async getMachineWithStatus(req: Request, res: Response): Promise<void> {
   },
 
   // ดึงข้อมูลสถานะล่าสุดของเครื่องจักร
-  async getMachineLatestStatus( res: Response): Promise<void> {
+  async getMachineLatestStatus(req: Request, res: Response): Promise<void> {
     try {
       const machines = await prisma.machine.findMany({
         include: {
@@ -190,7 +190,6 @@ async getMachineWithStatus(req: Request, res: Response): Promise<void> {
     }
   },
 
-
   // ดึงข้อมูล Hour Meter ล่าสุดของเครื่องจักร
   async getMachineLatestHourMeter(req: Request, res: Response): Promise<void> {
     try {
@@ -201,11 +200,9 @@ async getMachineWithStatus(req: Request, res: Response): Promise<void> {
       });
       res.status(200).json(latestHourMeter);
     } catch (error) {
-      res
-        .status(500)
-        .json({
-          error: "ไม่สามารถดึงข้อมูล Hour Meter ล่าสุดของเครื่องจักรได้",
-        });
+      res.status(500).json({
+        error: "ไม่สามารถดึงข้อมูล Hour Meter ล่าสุดของเครื่องจักรได้",
+      });
     }
   },
 
@@ -222,11 +219,9 @@ async getMachineWithStatus(req: Request, res: Response): Promise<void> {
       });
       res.status(200).json(latestPowerMetric);
     } catch (error) {
-      res
-        .status(500)
-        .json({
-          error: "ไม่สามารถดึงข้อมูล Power Metric ล่าสุดของเครื่องจักรได้",
-        });
+      res.status(500).json({
+        error: "ไม่สามารถดึงข้อมูล Power Metric ล่าสุดของเครื่องจักรได้",
+      });
     }
   },
 

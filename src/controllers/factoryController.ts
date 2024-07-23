@@ -24,7 +24,7 @@ export const factoryController = {
   },
 
   // ดึงข้อมูลโรงงานทั้งหมด
-  async getAllFactories( res: Response): Promise<void> {
+  async getAllFactories(req: Request, res: Response): Promise<void> {
     try {
       const factories: Factory[] = await prisma.factory.findMany({
         include: { company: true },
@@ -78,10 +78,14 @@ export const factoryController = {
   async deleteFactory(req: Request, res: Response): Promise<void> {
     try {
       const { id } = req.params;
-      await prisma.factory.delete({
+     const resault= await prisma.factory.delete({
         where: { id },
       });
-      res.status(204).send();
+      if (resault) {
+        res.status(200).json({ message: "ลบโรงงานเรียบร้อยแล้ว" });
+      } else {
+        res.status(404).json({ error: "ไม่พบโรงงาน" });
+      }
     } catch (error) {
       res.status(500).json({ error: "ไม่สามารถลบโรงงานได้" });
     }

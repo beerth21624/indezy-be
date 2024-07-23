@@ -3,6 +3,9 @@ import companyController from "../controllers/companyController";
 
 const router = express.Router();
 
+ console.log("getAllCompanies");
+
+
 router.post("/", companyController.createCompany);
 router.get("/", companyController.getAllCompanies);
 router.get("/:id", companyController.getCompanyById);

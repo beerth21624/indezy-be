@@ -42,7 +42,7 @@ export const maintenanceTaskController = {
   },
 
   // ดึงข้อมูลงานบำรุงรักษาทั้งหมด
-  async getAllMaintenanceTasks( res: Response): Promise<void> {
+  async getAllMaintenanceTasks(req: Request, res: Response): Promise<void> {
     try {
       const tasks: MaintenanceTask[] = await prisma.maintenanceTask.findMany({
         include: {
@@ -184,7 +184,7 @@ export const maintenanceTaskController = {
   },
 
   // ดึงงานบำรุงรักษาที่เกินกำหนด
-  async getOverdueTasks( res: Response): Promise<void> {
+  async getOverdueTasks(req: Request, res: Response): Promise<void> {
     try {
       const overdueTasks = await prisma.maintenanceTask.findMany({
         where: {

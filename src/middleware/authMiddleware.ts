@@ -14,6 +14,8 @@ export const authenticateToken = (
   res: Response,
   next: NextFunction
 ): void => {
+
+  
   const authHeader = req.headers["authorization"];
   const token = authHeader && authHeader.split(" ")[1];
 
@@ -27,6 +29,7 @@ export const authenticateToken = (
       res.status(403).json({ error: "token ไม่ถูกต้องหรือหมดอายุ" });
     } else {
       req.user = decoded as { userId: string };
+
       next();
     }
   });

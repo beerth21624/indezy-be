@@ -95,7 +95,7 @@ export const powerMetricController = {
   },
 
   // ดึงข้อมูล Power Metric ทั้งหมด
-  async getAllPowerMetrics( res: Response): Promise<void> {
+  async getAllPowerMetrics(req: Request, res: Response): Promise<void> {
     try {
       const powerMetrics: PowerMetric[] = await prisma.powerMetric.findMany({
         include: { machine: true },
@@ -248,6 +248,7 @@ export const powerMetricController = {
 
   // ดึงข้อมูล Power Metric ล่าสุดของแต่ละเครื่อง
   async getLatestPowerMetricForAllMachines(
+    req: Request,
     res: Response
   ): Promise<void> {
     try {
@@ -261,11 +262,9 @@ export const powerMetricController = {
       });
       res.status(200).json(latestPowerMetrics);
     } catch (error) {
-      res
-        .status(500)
-        .json({
-          error: "ไม่สามารถดึงข้อมูล Power Metric ล่าสุดของแต่ละเครื่องได้",
-        });
+      res.status(500).json({
+        error: "ไม่สามารถดึงข้อมูล Power Metric ล่าสุดของแต่ละเครื่องได้",
+      });
     }
   },
 };

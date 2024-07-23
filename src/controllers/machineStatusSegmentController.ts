@@ -42,6 +42,7 @@ export const machineStatusSegmentController = {
 
   // ดึงข้อมูลสถานะเครื่องจักรทั้งหมด
   async getAllMachineStatusSegments(
+    req: Request,
     res: Response
   ): Promise<void> {
     try {
@@ -143,6 +144,7 @@ export const machineStatusSegmentController = {
 
   // ดึงข้อมูลสถานะเครื่องจักรล่าสุดของแต่ละเครื่อง
   async getLatestStatusForAllMachines(
+    req: Request,
     res: Response
   ): Promise<void> {
     try {

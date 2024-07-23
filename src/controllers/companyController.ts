@@ -39,7 +39,6 @@ const convertCompany = (
 });
 
 export const companyController = {
-  // สร้างบริษัทใหม่
   async createCompany(req: Request, res: Response): Promise<void> {
     try {
       const { name } = req.body;
@@ -49,25 +48,27 @@ export const companyController = {
       });
       res.status(201).json(convertCompany(newCompany));
     } catch (error) {
-      res.status(500).json({ error: "ไม่สามารถสร้างบริษัทได้" });
+      res.status(500).json({ error: "Unable to create company" });
     }
   },
 
-  // ดึงข้อมูลบริษัททั้งหมด
-  async getAllCompanies(res: Response): Promise<void> {
+  async getAllCompanies(req: Request, res: Response): Promise<void> {
     try {
       const companies = await prisma.company.findMany({
         include: {
           factories: true,
         },
       });
+      if (companies.length === 0) {
+        res.status(404).json({ error: "No companies found" });
+        return;
+      }
       res.status(200).json(companies.map(convertCompany));
     } catch (error) {
-      res.status(500).json({ error: "ไม่สามารถดึงข้อมูลบริษัทได้" });
+      res.status(500).json({ error: "Unable to fetch companies" });
     }
   },
 
-  // ดึงข้อมูลบริษัทตาม ID
   async getCompanyById(req: Request, res: Response): Promise<void> {
     try {
       const { id } = req.params;
@@ -78,14 +79,13 @@ export const companyController = {
       if (company) {
         res.status(200).json(convertCompany(company));
       } else {
-        res.status(404).json({ error: "ไม่พบบริษัท" });
+        res.status(404).json({ error: "Company not found" });
       }
     } catch (error) {
-      res.status(500).json({ error: "ไม่สามารถดึงข้อมูลบริษัทได้" });
+      res.status(500).json({ error: "Unable to fetch company" });
     }
   },
 
-  // อัปเดตข้อมูลบริษัท
   async updateCompany(req: Request, res: Response): Promise<void> {
     try {
       const { id } = req.params;
@@ -97,22 +97,17 @@ export const companyController = {
       });
       res.status(200).json(convertCompany(updatedCompany));
     } catch (error) {
-      res.status(500).json({ error: "ไม่สามารถอัปเดตข้อมูลบริษัทได้" });
+      res.status(500).json({ error: "Unable to update company" });
     }
   },
 
-  // ลบบริษัท
   async deleteCompany(req: Request, res: Response): Promise<void> {
     try {
       const { id } = req.params;
-      const result = await prisma.company.delete({ where: { id } });
-      if (result) {
-        res.status(200).json({ message: "ลบบริษัทสำเร็จ" });
-      } else {
-        res.status(404).json({ error: "ไม่พบบริษัท" });
-      }
+      await prisma.company.delete({ where: { id } });
+      res.status(200).json({ message: "Company deleted successfully" });
     } catch (error) {
-      res.status(500).json({ error: "ไม่สามารถลบบริษัทได้" });
+      res.status(500).json({ error: "Unable to delete company" });
     }
   },
 };

@@ -14,7 +14,7 @@ export const rebuildAllIndexes = [
   authenticateToken,
   isAdmin,
   isActive,
-  async (res: Response): Promise<void> => {
+  async (req: Request, res: Response): Promise<void> => {
     try {
       // This is a placeholder. Actual implementation depends on your database system.
       // For PostgreSQL, you might use:
@@ -55,7 +55,7 @@ export const updateStatistics = [
   authenticateToken,
   isAdmin,
   isActive,
-  async (res: Response): Promise<void> => {
+  async (req: Request, res: Response): Promise<void> => {
     try {
       // This is a placeholder. Actual implementation depends on your database system.
       // For PostgreSQL, you might use:
@@ -73,7 +73,7 @@ export const checkIndexPerformance = [
   authenticateToken,
   isAdmin,
   isActive,
-  async (res: Response): Promise<void> => {
+  async (req: Request, res: Response): Promise<void> => {
     try {
       const performanceData = await gatherIndexPerformanceData();
       res.status(200).json(performanceData);
@@ -89,18 +89,16 @@ export const removeUnusedIndexes = [
   authenticateToken,
   isAdmin,
   isActive,
-  async ( res: Response): Promise<void> => {
+  async (req: Request, res: Response): Promise<void> => {
     try {
       const unusedIndexes = await identifyUnusedIndexes();
       for (const index of unusedIndexes) {
         await prisma.$executeRaw`DROP INDEX IF EXISTS ${index.name}`;
       }
-      res
-        .status(200)
-        .json({
-          message: "Unused indexes removed successfully",
-          removedIndexes: unusedIndexes,
-        });
+      res.status(200).json({
+        message: "Unused indexes removed successfully",
+        removedIndexes: unusedIndexes,
+      });
     } catch (error) {
       console.error("Error removing unused indexes:", error);
       res.status(500).json({ error: "Failed to remove unused indexes" });

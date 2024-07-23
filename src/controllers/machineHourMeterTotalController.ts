@@ -37,7 +37,7 @@ export const machineHourMeterTotalController = {
   },
 
   // ดึงข้อมูลชั่วโมงการทำงานทั้งหมด
-  async getAllHourMeterTotals(res: Response): Promise<void> {
+  async getAllHourMeterTotals(req: Request, res: Response): Promise<void> {
     try {
       const hourMeterTotals: MachineHourMeterTotal[] =
         await prisma.machineHourMeterTotal.findMany({
@@ -203,7 +203,7 @@ export const machineHourMeterTotalController = {
 
   // ดึงข้อมูลชั่วโมงการทำงานล่าสุดของแต่ละเครื่อง
   async getLatestHourMeterTotalForAllMachines(
-
+    req: Request,
     res: Response
   ): Promise<void> {
     try {
@@ -217,11 +217,9 @@ export const machineHourMeterTotalController = {
       });
       res.status(200).json(latestHourMeterTotals);
     } catch (error) {
-      res
-        .status(500)
-        .json({
-          error: "ไม่สามารถดึงข้อมูลชั่วโมงการทำงานล่าสุดของแต่ละเครื่องได้",
-        });
+      res.status(500).json({
+        error: "ไม่สามารถดึงข้อมูลชั่วโมงการทำงานล่าสุดของแต่ละเครื่องได้",
+      });
     }
   },
 };

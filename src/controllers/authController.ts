@@ -52,12 +52,10 @@ export const authController = {
     }
   },
 
-  // เข้าสู่ระบบ
   async login(req: Request, res: Response): Promise<void> {
     try {
       const { username, password } = req.body;
 
-      // ค้นหาผู้ใช้
       const user = await prisma.user.findUnique({ where: { username } });
 
       if (!user) {
@@ -65,7 +63,6 @@ export const authController = {
         return;
       }
 
-      // ตรวจสอบรหัสผ่าน
       const isPasswordValid = await bcrypt.compare(password, user.password);
 
       if (!isPasswordValid) {
@@ -73,12 +70,10 @@ export const authController = {
         return;
       }
 
-      // สร้าง JWT token
       const token = jwt.sign({ userId: user.id }, JWT_SECRET, {
         expiresIn: "1d",
       });
 
-      // อัปเดตเวลาเข้าสู่ระบบล่าสุด
       await prisma.user.update({
         where: { id: user.id },
         data: { lastLogin: new Date() },
@@ -92,7 +87,6 @@ export const authController = {
     }
   },
 
-  // เปลี่ยนรหัสผ่าน
   async changePassword(
     req: AuthenticatedRequest,
     res: Response
@@ -173,8 +167,6 @@ export const authController = {
 
   // ออกจากระบบ (ทำได้ที่ฝั่ง client โดยการลบ token)
   async logout(res: Response): Promise<void> {
-    // ในกรณีนี้ เราแค่ส่งการตอบกลับว่าออกจากระบบสำเร็จ
-    // การจัดการ token จริงๆ ควรทำที่ฝั่ง client
     res.status(200).json({ message: "ออกจากระบบสำเร็จ" });
   },
 };

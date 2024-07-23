@@ -50,7 +50,7 @@ export const sparePartController = {
   },
 
   // ดึงข้อมูลอะไหล่ทั้งหมด
-  async getAllSpareParts( res: Response): Promise<void> {
+  async getAllSpareParts(req: Request, res: Response): Promise<void> {
     try {
       const spareParts: SparePart[] = await prisma.sparePart.findMany({
         include: { machine: true },
@@ -167,7 +167,7 @@ export const sparePartController = {
   },
 
   // ดึงข้อมูลอะไหล่ที่ต้องสั่งซื้อ (จำนวนต่ำกว่าขั้นต่ำ)
-  async getLowStockSpareParts( res: Response): Promise<void> {
+  async getLowStockSpareParts(req: Request, res: Response): Promise<void> {
     try {
       const lowStockParts = await prisma.sparePart.findMany({
         where: {

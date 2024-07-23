@@ -28,6 +28,10 @@ app.use(cors());
 // Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+
+
+
 // app.use(httpLogger);
 // Health check route
 app.get("/health", (_, res) => {

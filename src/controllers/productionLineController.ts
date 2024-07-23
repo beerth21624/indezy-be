@@ -25,7 +25,7 @@ export const productionLineController = {
   },
 
   // ดึงข้อมูลสายการผลิตทั้งหมด
-  async getAllProductionLines(res: Response): Promise<void> {
+  async getAllProductionLines(req: Request, res: Response): Promise<void> {
     try {
       const productionLines: ProductionLine[] =
         await prisma.productionLine.findMany({
@@ -82,7 +82,7 @@ export const productionLineController = {
   async deleteProductionLine(req: Request, res: Response): Promise<void> {
     try {
       const { id } = req.params;
-     const resault= await prisma.productionLine.delete({
+      const resault = await prisma.productionLine.delete({
         where: { id },
       });
       if (resault) {
